@@ -6,7 +6,7 @@ This is the original pytorch implementation of STIDGCN in the following paper:
 
 
 <p align="center">
-  <img width="696" height="340" src=./figs/fig1.png>
+  <img width="835" height="408" src=./figs/fig1.png>
 </p>
 
 ## Requirements
