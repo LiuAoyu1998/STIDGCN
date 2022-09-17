@@ -1,0 +1,8 @@
+python
+numpy
+pandas
+torch
+matplotlib
+scipy
+argparse
+torchinfo
