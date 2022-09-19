@@ -36,6 +36,11 @@ nohup python -u train.py --data PEMS07 --save ./logs/PEMS07/ > PEMS07.log 2>&1 &
 # PEMS08
 nohup python -u train.py --data PEMS08 --save ./logs/PEMS08/ > PEMS08.log 2>&1 &
 ```
+## Results
+
+<p align="center">
+  <img width="856" height="368" src=./figs/fig1.png>
+</p>
 
 ## Cite
 If you make use of this code in your own work, please cite our paper:
