@@ -10,7 +10,7 @@ import os
 parser = argparse.ArgumentParser()
 parser.add_argument('--device', type=str, default='cuda:1', help='')
 parser.add_argument('--data', type=str,
-                    default='data/PEMS08', help='data path')
+                    default='PEMS08', help='data path')
 parser.add_argument('--adjdata', type=str,
                     default='data/PEMS08/adj_PEMS08.pkl', help='adj data path')
 parser.add_argument('--adjtype', type=str,
@@ -25,10 +25,10 @@ parser.add_argument('--learning_rate', type=float,
 parser.add_argument('--dropout', type=float, default=0.3, help='dropout rate')
 parser.add_argument('--weight_decay', type=float,
                     default=0.0001, help='weight decay rate')
-parser.add_argument('--epochs', type=int, default=500, help='')
+parser.add_argument('--epochs', type=int, default=1, help='')
 parser.add_argument('--print_every', type=int, default=50, help='')
 parser.add_argument('--save', type=str,
-                    default='./logs/test/', help='save path')
+                    default='./logs/'+str(time.strftime('%Y-%m-%d-%H:%M:%S'))+"-", help='save path')
 parser.add_argument('--expid', type=int, default=1, help='experiment id')
 parser.add_argument('--es_patience', type=int, default=150,
                     help='quit if no improvement after this many iterations')
@@ -37,6 +37,9 @@ args = parser.parse_args()
 
 
 def main():
+
+    data = args.data
+
     if args.data == "PEMS08":
         args.data = "data/"+args.data
         args.num_nodes = 170
@@ -68,8 +71,10 @@ def main():
 
     loss = 9999999
     test_log = 999999
+    bestid = 0
     epochs_since_best_mae = 0
-    path = args.save
+    path = args.save + data + "/"
+
     his_loss = []
     val_time = []
     train_time = []
@@ -160,7 +165,7 @@ def main():
                 # It is not necessary to print the results of the test set when epoch is less than 100, because the model has not yet converged.
                 loss = mvalid_loss
                 torch.save(engine.model.state_dict(),
-                           args.save+"best_model.pth")
+                           path+"best_model.pth")
                 epochs_since_best_mae = 0
                 print("Updating! Valid Loss:", mvalid_loss, end=", ")
                 print("epoch: ", i)
@@ -207,7 +212,7 @@ def main():
                     test_log = np.mean(amae)
                     loss = mvalid_loss
                     torch.save(engine.model.state_dict(),
-                               args.save+"best_model.pth")
+                               path+"best_model.pth")
                     epochs_since_best_mae = 0
                     print("Test low! Updating! Test Loss:",
                           np.mean(amae), end=", ")
@@ -223,9 +228,8 @@ def main():
             epochs_since_best_mae += 1
             print("No update")
 
-
         train_csv = pd.DataFrame(result)
-        train_csv.round(6).to_csv(f'{args.save}/train.csv')
+        train_csv.round(6).to_csv(f'{path}/train.csv')
         if epochs_since_best_mae >= args.es_patience and i >= 300:
             break
 
@@ -239,7 +243,7 @@ def main():
     print("The epoch of the best result：", bestid)
     print("The valid loss of the best model", str(round(his_loss[bestid], 4)))
 
-    engine.model.load_state_dict(torch.load(args.save+"best_model.pth"))
+    engine.model.load_state_dict(torch.load(path+"best_model.pth"))
     outputs = []
     realy = torch.Tensor(dataloader['y_test']).to(device)
     realy = realy.transpose(1, 3)[:, 0, :, :]
@@ -258,7 +262,7 @@ def main():
     amape = []
     armse = []
     test_m = []
-    
+
     for i in range(12):
         pred = scaler.inverse_transform(yhat[:, :, i])
         real = realy[:, :, i]
@@ -284,7 +288,7 @@ def main():
     test_result.append(test_m)
 
     test_csv = pd.DataFrame(test_result)
-    test_csv.round(6).to_csv(f'{args.save}/test.csv')
+    test_csv.round(6).to_csv(f'{path}/test.csv')
 
 
 if __name__ == "__main__":
