@@ -8,7 +8,7 @@ from engine import trainer
 import os
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--device', type=str, default='cuda:1', help='')
+parser.add_argument('--device', type=str, default='cuda:0', help='')
 parser.add_argument('--data', type=str,
                     default='PEMS08', help='data path')
 parser.add_argument('--adjdata', type=str,
@@ -25,7 +25,7 @@ parser.add_argument('--learning_rate', type=float,
 parser.add_argument('--dropout', type=float, default=0.3, help='dropout rate')
 parser.add_argument('--weight_decay', type=float,
                     default=0.0001, help='weight decay rate')
-parser.add_argument('--epochs', type=int, default=1, help='')
+parser.add_argument('--epochs', type=int, default=3, help='')
 parser.add_argument('--print_every', type=int, default=50, help='')
 parser.add_argument('--save', type=str,
                     default='./logs/'+str(time.strftime('%Y-%m-%d-%H:%M:%S'))+"-", help='save path')
@@ -71,7 +71,6 @@ def main():
 
     loss = 9999999
     test_log = 999999
-    bestid = 0
     epochs_since_best_mae = 0
     path = args.save + data + "/"
 
@@ -97,7 +96,6 @@ def main():
         train_loss = []
         train_mape = []
         train_rmse = []
-
         t1 = time.time()
         dataloader['train_loader'].shuffle()
         for iter, (x, y) in enumerate(dataloader['train_loader'].get_iterator()):
@@ -166,6 +164,7 @@ def main():
                 loss = mvalid_loss
                 torch.save(engine.model.state_dict(),
                            path+"best_model.pth")
+                bestid = i
                 epochs_since_best_mae = 0
                 print("Updating! Valid Loss:", mvalid_loss, end=", ")
                 print("epoch: ", i)
@@ -241,7 +240,7 @@ def main():
     # test
     print("Training ends")
     print("The epoch of the best result：", bestid)
-    print("The valid loss of the best model", str(round(his_loss[bestid], 4)))
+    print("The valid loss of the best model", str(round(his_loss[bestid-1], 4)))
 
     engine.model.load_state_dict(torch.load(path+"best_model.pth"))
     outputs = []
