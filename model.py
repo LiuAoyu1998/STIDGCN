@@ -61,7 +61,7 @@ class Graph_Generator(nn.Module):
     def __init__(self, device, channels, num_nodes, dropout=0.3):
         super().__init__()
         self.dropout = dropout
-        self.node = c_out
+        self.node = num_nodes
         self.device = device
         self.fc0 = nn.Linear(channels, num_nodes)
         self.fc1 = nn.Linear(num_nodes, 2*num_nodes)
