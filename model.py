@@ -222,13 +222,13 @@ class IDGCN(nn.Module):
         learn_adj = self.graph_generator(x3, adaptive_adj)
         dadj = learn_adj*self.a+adaptive_adj*(1-self.a)
         x3 = x3+self.diffusion_conv(x3, [dadj])
-        x_odd_update = d - x3  #
+        x_odd_update = d - x3 # Either "+" or "-" here does not have much effect on the results.
 
         x4 = self.conv4(d)
         learn_adj = self.graph_generator(x4, adaptive_adj)
         dadj = learn_adj*self.a+adaptive_adj*(1-self.a)
         x4 = x4+self.diffusion_conv(x4, [dadj])
-        x_even_update = c + x4
+        x_even_update = c + x4 # Either "+" or "-" here does not have much effect on the results.
 
         return (x_even_update, x_odd_update, dadj)
 
