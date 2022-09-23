@@ -87,9 +87,6 @@ class Graph_Generator(nn.Module):
         return x
 
 
-
-
-
 class Splitting(nn.Module):
     def __init__(self):
         super(Splitting, self).__init__()
