@@ -5,9 +5,33 @@ import torch.nn.functional as F
 
 
 def nconv(x, A):
-    return torch.einsum('ncvl,vw->ncwl', (x, A)).contiguous()
+    return torch.einsum('bcnt,nm->bcmt', (x, A)).contiguous()
 
 
+class Diffusion_GCN(nn.Module):
+    def __init__(self, c_in, c_out, dropout, support_len=2, order=1):
+        super().__init__()
+        c_in = (order * support_len + 1) * c_in
+        self.conv = Conv2d(c_in, c_out, (1, 1), padding=(
+            0, 0), stride=(1, 1), bias=True)
+        self.dropout = dropout
+        self.order = order
+
+    def forward(self, x, support: list):
+        out = [x]
+        for a in support:
+            x1 = nconv(x, a)
+            out.append(x1)
+            for k in range(2, self.order + 1):
+                x2 = nconv(x1, a)
+                out.append(x2)
+                x1 = x2
+        h = torch.cat(out, dim=1)
+        h = self.conv(h)
+        h = F.dropout(h, self.dropout, training=self.training)
+        return h
+    
+    
 def sample_gumbel(device, shape, eps=1e-20):
     U = torch.rand(shape).to(device)
     return -torch.autograd.Variable(torch.log(-torch.log(U + eps) + eps))
@@ -34,15 +58,15 @@ def gumbel_softmax(device, logits, temperature, hard=False, eps=1e-10):
 
 
 class Graph_Generator(nn.Module):
-    def __init__(self, device, c_in, c_out,  channels, dropout=0.3):
+    def __init__(self, device, channels, num_nodes, dropout=0.3):
         super().__init__()
         self.dropout = dropout
         self.node = c_out
         self.device = device
-        self.fc0 = nn.Linear(channels, c_in)
-        self.fc1 = nn.Linear(c_in, 2*c_in)
-        self.fc2 = nn.Linear(2*c_in, c_out)
-        self.diffusion_conv = Diffusion_GCN(64, 64, dropout, support_len=1)
+        self.fc0 = nn.Linear(channels, num_nodes)
+        self.fc1 = nn.Linear(num_nodes, 2*num_nodes)
+        self.fc2 = nn.Linear(2*num_nodes, num_nodes)
+        self.diffusion_conv = Diffusion_GCN(channels, channels, dropout, support_len=1)
 
     def forward(self, x, adj):
         x = self.diffusion_conv(x, [adj])
@@ -63,28 +87,7 @@ class Graph_Generator(nn.Module):
         return x
 
 
-class Diffusion_GCN(nn.Module):
-    def __init__(self, c_in, c_out, dropout, support_len=2, order=1):
-        super().__init__()
-        c_in = (order * support_len + 1) * c_in
-        self.conv = Conv2d(c_in, c_out, (1, 1), padding=(
-            0, 0), stride=(1, 1), bias=True)
-        self.dropout = dropout
-        self.order = order
 
-    def forward(self, x, support: list):
-        out = [x]
-        for a in support:
-            x1 = nconv(x, a)
-            out.append(x1)
-            for k in range(2, self.order + 1):
-                x2 = nconv(x1, a)
-                out.append(x2)
-                x1 = x2
-        h = torch.cat(out, dim=1)
-        h = self.conv(h)
-        h = F.dropout(h, self.dropout, training=self.training)
-        return h
 
 
 class Splitting(nn.Module):
@@ -178,7 +181,7 @@ class IDGCN(nn.Module):
             device=device), requires_grad=True).to(device)
 
         self.graph_generator = Graph_Generator(
-            device, num_nodes, num_nodes, channels)
+            device, channels, num_nodes)
 
         self.diffusion_conv = Diffusion_GCN(
             channels, channels, dropout, support_len=self.pre_adj_len)
