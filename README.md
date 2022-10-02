@@ -1,6 +1,6 @@
 # Spatial-Temporal Interactive Dynamic Graph Convolution Network for Traffic Forecasting
 
-This is the original pytorch implementation of STIDGCN in the following paper ⚡️ : [Spatial-Temporal Interactive Dynamic Graph Convolution Network for Traffic Forecasting, 2022.05.](https://arxiv.org/abs/2205.08689)
+This is the original pytorch implementation of STIDGCN in the following paper ⚡️ : [Spatial-Temporal Interactive Dynamic Graph Convolution Network for Traffic Forecasting, 2022.05.](https://arxiv.org/abs/2205.08689) I hope these codes are helpful to you, 🌟!
 
 ## Abstract
 
