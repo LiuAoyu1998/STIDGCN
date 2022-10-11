@@ -20,7 +20,7 @@ Accurate traffic forecasting is essential for urban traffic control, route plann
 - argparse
 
 ## Data Preparation
-Download the dataset(PEMS03, PEMS04, PEMS07, PEMS08) from here, [Baidu Drive](https://pan.baidu.com/s/1pbRUmRg_Y69KRNEuKZParQ), and the password is <b>1s5t</b>. You can put them in the "data" folder. You can access the <b>generate_datasets.py</b> and <b>gen_adj_mx.py</b> files to get the dataset and adjacency matrix generation methods.
+Download the dataset(PEMS03, PEMS04, PEMS07, PEMS08) from here, [Baidu Drive](https://pan.baidu.com/s/1pbRUmRg_Y69KRNEuKZParQ), and the password is <b>1s5t</b>. You can put them in the "data" folder. The data here is generated using <b>generate_datasets.py</b> and <b>gen_adj_mx.py</b>, you don't need to do any further processing. If you want to see the details of how the data is processed, check out <b>generate_datasets.py</b> and <b>gen_adj_mx.py</b>.
 
 ## Train Commands
 
