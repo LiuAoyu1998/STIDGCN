@@ -10,7 +10,6 @@ def get_adjacency_matrix(distance_df_filename, num_of_vertices, id_filename=None
     ----------
     distance_df_filename: str, path of the csv file contains edges information
     num_of_vertices: int, the number of vertices
-
     Returns
     ----------
     A: np.ndarray, adjacency matrix
@@ -56,10 +55,12 @@ def get_adjacency_matrix(distance_df_filename, num_of_vertices, id_filename=None
 
 
 def generate_adj_PEMS():
-    direction = True
+    id_filename = None
     data_name = "PEMS08"
+
     if data_name == "PEMS03":
         num_of_vertices = 358
+        id_filename = data_name+".txt" # 只有PEMS03需要txt，因为节点不是从0开始编号
     elif data_name == "PEMS04":
         num_of_vertices = 307
     elif data_name == "PEMS07":
@@ -67,11 +68,7 @@ def generate_adj_PEMS():
     elif data_name == "PEMS08":
         num_of_vertices = 170
     distance_df_filename = data_name+".csv"  # 你的csv文件
-    if os.path.exists(distance_df_filename.split(".")[0] + ".txt"):
-        id_filename = distance_df_filename.split(".")[0] + ".txt"
-    else:
-        id_filename = None
- 
+
     adj_mx, distance_mx = get_adjacency_matrix(
         distance_df_filename, num_of_vertices, id_filename=id_filename)
  
