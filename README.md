@@ -40,7 +40,7 @@ nohup python -u train.py --data PEMS08 > PEMS08.log 2>&1 &
 ## Results
 
 <p align="center">
-  <img width="856" height="368" src=./figs/fig2.png>
+  <img width="856" height="368" src=./figs/result.png>
 </p>
 
 ## Cite
