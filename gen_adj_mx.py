@@ -77,9 +77,9 @@ def generate_adj_PEMS():
     if add_self_loop:
         adj_mx = adj_mx + np.identity(adj_mx.shape[0])
         distance_mx = distance_mx + np.identity(distance_mx.shape[0])
-    pickle.dump(adj_mx, open("test_adj_"+data_name+".pkl", 'wb'))  # 节点邻接矩阵输出地址
+    pickle.dump(adj_mx, open("adj_"+data_name+".pkl", 'wb'))  # 节点邻接矩阵输出地址
     pickle.dump(distance_mx, open(
-        "test_adj_"+data_name+"_distance.pkl", 'wb'))  # 边邻接矩阵输出地址
+        "adj_"+data_name+"_distance.pkl", 'wb'))  # 边邻接矩阵输出地址
     print(adj_mx)
     print(distance_mx)
 
