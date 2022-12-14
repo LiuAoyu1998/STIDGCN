@@ -25,7 +25,7 @@ parser.add_argument('--learning_rate', type=float,
 parser.add_argument('--dropout', type=float, default=0.3, help='dropout rate')
 parser.add_argument('--weight_decay', type=float,
                     default=0.0001, help='weight decay rate')
-parser.add_argument('--epochs', type=int, default=3, help='')
+parser.add_argument('--epochs', type=int, default=500, help='')
 parser.add_argument('--print_every', type=int, default=50, help='')
 parser.add_argument('--save', type=str,
                     default='./logs/'+str(time.strftime('%Y-%m-%d-%H:%M:%S'))+"-", help='save path')
@@ -61,7 +61,7 @@ def main():
         args.adjdata = "data/PEMS07/adj_PEMS07.pkl"
 
     device = torch.device(args.device)
-    adj_mx = util.load_adj(
+    sensor_ids, sensor_id_to_ind, adj_mx = util.load_adj(
         args.adjdata, args.adjtype)
 
     dataloader = util.load_dataset(
