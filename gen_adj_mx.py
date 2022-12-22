@@ -1,87 +1,63 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+import argparse
 import numpy as np
-import csv
+import pandas as pd
 import pickle
-import os
 
 
-def get_adjacency_matrix(distance_df_filename, num_of_vertices, id_filename=None):
-    '''
-    Parameters
-    ----------
-    distance_df_filename: str, path of the csv file contains edges information
-    num_of_vertices: int, the number of vertices
-    Returns
-    ----------
-    A: np.ndarray, adjacency matrix
-    '''
-    if 'npy' in distance_df_filename:
-        adj_mx = np.load(distance_df_filename)
-        return adj_mx, None
-    else:
-        A = np.zeros((int(num_of_vertices), int(
-            num_of_vertices)), dtype=np.float32)
-        distaneA = np.zeros((int(num_of_vertices), int(num_of_vertices)),
-                            dtype=np.float32)
-        # distance file中的id并不是从0开始的 所以要进行重新的映射；id_filename是节点的顺序
-        if id_filename:
-            with open(id_filename, 'r') as f:
-                id_dict = {int(i): idx for idx, i in enumerate(
-                    f.read().strip().split('\n'))}  # 把节点id（idx）映射成从0开始的索引
-            with open(distance_df_filename, 'r') as f:
-                f.readline()  # 略过表头那一行
-                reader = csv.reader(f)
-                for row in reader:
-                    if len(row) != 3:
-                        continue
-                    i, j, distance = int(row[0]), int(row[1]), float(row[2])
-                    A[id_dict[i], id_dict[j]] = 1
-                    A[id_dict[j], id_dict[i]] = 1
-                    distaneA[id_dict[i], id_dict[j]] = distance
-                    distaneA[id_dict[j], id_dict[i]] = distance
-            return A, distaneA
-        else:  # distance file中的id直接从0开始
-            with open(distance_df_filename, 'r') as f:
-                f.readline()
-                reader = csv.reader(f)
-                for row in reader:
-                    if len(row) != 3:
-                        continue
-                    i, j, distance = int(row[0]), int(row[1]), float(row[2])
-                    A[i, j] = 1
-                    A[j, i] = 1
-                    distaneA[i, j] = distance
-                    distaneA[j, i] = distance
-            return A, distaneA
+def get_adjacency_matrix(distance_df, sensor_ids, normalized_k=0.1):
+    """
+    :param distance_df: data frame with three columns: [from, to, distance].
+    :param sensor_ids: list of sensor ids.
+    :param normalized_k: entries that become lower than normalized_k after normalization are set to zero for sparsity.
+    :return:
+    """
+    num_sensors = len(sensor_ids)
+    dist_mx = np.zeros((num_sensors, num_sensors), dtype=np.float32)
+    dist_mx[:] = np.inf
+    # Builds sensor id to index map.
+    sensor_id_to_ind = {}
+    for i, sensor_id in enumerate(sensor_ids):
+        sensor_id_to_ind[sensor_id] = i
+
+    # Fills cells in the matrix with distances.
+    for row in distance_df.values:
+        if row[0] not in sensor_id_to_ind or row[1] not in sensor_id_to_ind:
+            continue
+        dist_mx[sensor_id_to_ind[row[0]], sensor_id_to_ind[row[1]]] = row[2]
+    print(dist_mx)
+    # Calculates the standard deviation as theta.
+    distances = dist_mx[~np.isinf(dist_mx)].flatten()
+    std = distances.std()
+    adj_mx = np.exp(-np.square(dist_mx / std))
+    # Make the adjacent matrix symmetric by taking the max.
+    # adj_mx = np.maximum.reduce([adj_mx, adj_mx.T])
+
+    # Sets entries that lower than a threshold, i.e., k, to zero for sparsity.
+    adj_mx[adj_mx < normalized_k] = 0
+    return sensor_ids, sensor_id_to_ind, adj_mx
 
 
-def generate_adj_PEMS():
-    id_filename = None
-    data_name = "PEMS08"
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--sensor_ids_filename', type=str, default='/home/lay/lay/code/Work1_test/STIDGCN_test/data/PEMS08/id.txt',
+                        help='File containing sensor ids separated by comma.')
+    parser.add_argument('--distances_filename', type=str, default='/home/lay/lay/code/Work1_test/STIDGCN_test/data/PEMS08/PEMS08.csv',
+                        help='CSV file containing sensor distances with three columns: [from, to, distance].')
+    parser.add_argument('--normalized_k', type=float, default=0.1,
+                        help='Entries that become lower than normalized_k after normalization are set to zero for sparsity.')
+    parser.add_argument('--output_pkl_filename', type=str, default='/home/lay/lay/code/Work1_test/STIDGCN_test/adj.pkl',
+                        help='Path of the output file.')
+    args = parser.parse_args()
 
-    if data_name == "PEMS03":
-        num_of_vertices = 358
-        id_filename = data_name+".txt" # 只有PEMS03需要txt，因为节点不是从0开始编号
-    elif data_name == "PEMS04":
-        num_of_vertices = 307
-    elif data_name == "PEMS07":
-        num_of_vertices = 883
-    elif data_name == "PEMS08":
-        num_of_vertices = 170
-    distance_df_filename = data_name+".csv"  # 你的csv文件
-
-    adj_mx, distance_mx = get_adjacency_matrix(
-        distance_df_filename, num_of_vertices, id_filename=id_filename)
- 
-    # TODO: the self loop is missing
-    add_self_loop = False
-    if add_self_loop:
-        adj_mx = adj_mx + np.identity(adj_mx.shape[0])
-        distance_mx = distance_mx + np.identity(distance_mx.shape[0])
-    pickle.dump(adj_mx, open("adj_"+data_name+".pkl", 'wb'))  # 节点邻接矩阵输出地址
-    pickle.dump(distance_mx, open(
-        "adj_"+data_name+"_distance.pkl", 'wb'))  # 边邻接矩阵输出地址
-    print(adj_mx)
-    print(distance_mx)
-
-
-generate_adj_PEMS()
+    with open(args.sensor_ids_filename) as f:
+        sensor_ids = f.read().strip().split(', ')
+    distance_df = pd.read_csv(args.distances_filename, dtype={'from': 'str', 'to': 'str'})
+    normalized_k = args.normalized_k
+    _, sensor_id_to_ind, adj_mx = get_adjacency_matrix(distance_df, sensor_ids, normalized_k)
+    # Save to pickle file.
+    with open(args.output_pkl_filename, 'wb') as f:
+        pickle.dump([sensor_ids, sensor_id_to_ind, adj_mx], f, protocol=2)
