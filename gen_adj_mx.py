@@ -60,4 +60,4 @@ if __name__ == '__main__':
     adj_mx = get_adjacency_matrix(distance_df, sensor_ids, normalized_k)
     # Save to pickle file.
     with open(args.output_pkl_filename, 'wb') as f:
-        pickle.dump([adj_mx], f, protocol=2)
+        pickle.dump(adj_mx, f, protocol=2)
