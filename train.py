@@ -61,7 +61,7 @@ def main():
         args.adjdata = "data/PEMS07/adj_PEMS07.pkl"
 
     device = torch.device(args.device)
-    sensor_ids, sensor_id_to_ind, adj_mx = util.load_adj(
+    adj_mx = util.load_adj(
         args.adjdata, args.adjtype)
 
     dataloader = util.load_dataset(
