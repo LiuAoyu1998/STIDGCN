@@ -38,7 +38,7 @@ def get_adjacency_matrix(distance_df, sensor_ids, normalized_k=0.1):
 
     # Sets entries that lower than a threshold, i.e., k, to zero for sparsity.
     adj_mx[adj_mx < normalized_k] = 0
-    return sensor_ids, sensor_id_to_ind, adj_mx
+    return adj_mx
 
 
 if __name__ == '__main__':
@@ -57,7 +57,7 @@ if __name__ == '__main__':
         sensor_ids = f.read().strip().split(', ')
     distance_df = pd.read_csv(args.distances_filename, dtype={'from': 'str', 'to': 'str'})
     normalized_k = args.normalized_k
-    _, sensor_id_to_ind, adj_mx = get_adjacency_matrix(distance_df, sensor_ids, normalized_k)
+    adj_mx = get_adjacency_matrix(distance_df, sensor_ids, normalized_k)
     # Save to pickle file.
     with open(args.output_pkl_filename, 'wb') as f:
-        pickle.dump([sensor_ids, sensor_id_to_ind, adj_mx], f, protocol=2)
+        pickle.dump([adj_mx], f, protocol=2)
