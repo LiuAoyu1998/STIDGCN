@@ -70,7 +70,7 @@ class Graph_Generator(nn.Module):
 
     def forward(self, x, adj):
         x = self.diffusion_conv(x, [adj])
-        x = x.sum(0)
+        x = x[-1,:,:,:]
         x = x.sum(2)
         x = x.permute(1, 0)
         x = self.fc0(x)
