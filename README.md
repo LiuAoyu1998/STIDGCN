@@ -12,10 +12,9 @@ This is the pytorch implementation of STIDGCN. I hope these codes are helpful to
 - argparse
 
 ## Data Preparation
-Download the dataset(PEMS03, PEMS04, PEMS07, PEMS08) from here, [Baidu Drive](https://pan.baidu.com/s/1pbRUmRg_Y69KRNEuKZParQ), and the password is <b>1s5t</b>. You can put them in the "data" folder. The data here is generated using <b>generate_datasets.py</b> and <b>gen_adj_mx.py</b>, you don't need to do any further processing. If you want to see the details of how the data is processed, check out <b>generate_datasets.py</b> and <b>gen_adj_mx.py</b>.
+Download the dataset(PEMS03, PEMS04, PEMS07, PEMS08) from here, [STSGCN](https://github.com/Davidham3/STSGCN). The data is processed in the same as STSGCN.
 
 ## Train Commands
-
 ```
 # PEMS03
 nohup python -u train.py --data PEMS03 > PEMS03.log 2>&1 &
