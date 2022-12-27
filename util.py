@@ -166,6 +166,23 @@ def load_dataset(dataset_dir, batch_size, valid_batch_size=None, test_batch_size
     for category in ['train', 'val', 'test']:
         data['x_' + category][...,
                               0] = scaler.transform(data['x_' + category][..., 0])
+    
+    # 对顺序出现的数据全局随机打乱
+    mask_train = torch.arange(int(data['x_train'].shape[0]))
+    mask_train = torch.randperm(mask_train.size(0))
+    data['x_train'] =  data['x_train'][mask_train,...]
+    data['y_train'] =  data['y_train'][mask_train,...]
+    
+    mask_val = torch.arange(int(data['x_val'].shape[0]))
+    mask_val = torch.randperm(mask_val.size(0))
+    data['x_val'] =  data['x_val'][mask_val,...]
+    data['y_val'] =  data['y_val'][mask_val,...]
+
+    mask_test = torch.arange(int(data['x_test'].shape[0]))
+    mask_test = torch.randperm(mask_test.size(0))
+    data['x_test'] =  data['x_test'][mask_test,...]
+    data['y_test'] =  data['y_test'][mask_test,...]
+
     data['train_loader'] = DataLoader(
         data['x_train'], data['y_train'], batch_size)
     data['val_loader'] = DataLoader(
@@ -173,6 +190,7 @@ def load_dataset(dataset_dir, batch_size, valid_batch_size=None, test_batch_size
     data['test_loader'] = DataLoader(
         data['x_test'], data['y_test'], test_batch_size)
     data['scaler'] = scaler
+
     return data
 
 
