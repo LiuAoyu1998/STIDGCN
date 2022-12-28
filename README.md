@@ -12,7 +12,7 @@ This is the pytorch implementation of STIDGCN. I hope these codes are helpful to
 - argparse
 
 ## Datasets
-Download the dataset(PEMS03, PEMS04, PEMS07, PEMS08) from here, [STSGCN](https://github.com/Davidham3/STSGCN). The data is processed in the same as STSGCN.
+Download the datasets(PEMS03, PEMS04, PEMS07, PEMS08) from here, [STSGCN](https://github.com/Davidham3/STSGCN). The data is processed in the same as STSGCN.
 
 ## Train Commands
 ```
