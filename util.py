@@ -134,6 +134,7 @@ def load_pickle(pickle_file):
 
 
 def load_adj(pkl_filename, adjtype):
+    # _,_,adj_mx = load_pickle(pkl_filename)
     adj_mx = load_pickle(pkl_filename)
     if adjtype == "scalap":
         adj = [calculate_scaled_laplacian(adj_mx)]
@@ -167,21 +168,22 @@ def load_dataset(dataset_dir, batch_size, valid_batch_size=None, test_batch_size
         data['x_' + category][...,
                               0] = scaler.transform(data['x_' + category][..., 0])
     
-    # 对顺序出现的数据全局随机打乱
-    random_train = torch.arange(int(data['x_train'].shape[0]))
-    random_train = torch.randperm(random_train.size(0))
-    data['x_train'] =  data['x_train'][random_train,...]
-    data['y_train'] =  data['y_train'][random_train,...]
+    # 对顺序出现的标签整体打乱
+    print("Perform shuffle on the dataset")
+    mask_train = torch.arange(int(data['x_train'].shape[0]))
+    mask_train = torch.randperm(mask_train.size(0))
+    data['x_train'] =  data['x_train'][mask_train,...]
+    data['y_train'] =  data['y_train'][mask_train,...]
     
-    random_val = torch.arange(int(data['x_val'].shape[0]))
-    random_val = torch.randperm(random_val.size(0))
-    data['x_val'] =  data['x_val'][random_val,...]
-    data['y_val'] =  data['y_val'][random_val,...]
+    mask_val = torch.arange(int(data['x_val'].shape[0]))
+    mask_val = torch.randperm(mask_val.size(0))
+    data['x_val'] =  data['x_val'][mask_val,...]
+    data['y_val'] =  data['y_val'][mask_val,...]
 
-    random_test = torch.arange(int(data['x_test'].shape[0]))
-    random_test = torch.randperm(random_test.size(0))
-    data['x_test'] =  data['x_test'][random_test,...]
-    data['y_test'] =  data['y_test'][random_test,...]
+    mask_test = torch.arange(int(data['x_test'].shape[0]))
+    mask_test = torch.randperm(mask_test.size(0))
+    data['x_test'] =  data['x_test'][mask_test,...]
+    data['y_test'] =  data['y_test'][mask_test,...]
 
     data['train_loader'] = DataLoader(
         data['x_train'], data['y_train'], batch_size)
