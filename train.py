@@ -97,8 +97,7 @@ def main():
         train_mape = []
         train_rmse = []
         t1 = time.time()
-        dataloader['train_loader'].shuffle()
-        for iter, (x, y) in enumerate(dataloader['train_loader'].get_iterator()):
+        for iter, (x, y) in enumerate(dataloader['train_loader'].get_iterator()): # 数据集在构建dataloader时就已经全局随机打乱，具体见utils.py
             trainx = torch.Tensor(x).to(device)  # 64 12 170 1
             trainx = trainx.transpose(1, 3)
             trainy = torch.Tensor(y).to(device)
