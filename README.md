@@ -1,6 +1,6 @@
 # STIDGCN
 
-This is the pytorch implementation of STIDGCN. I hope these codes are helpful to you, 🌟!
+This is the pytorch implementation of STIDGCN. I hope these codes are helpful to you!
 
 <img src="figs/model.png" width="75%">
 
