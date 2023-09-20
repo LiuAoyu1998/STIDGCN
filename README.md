@@ -15,6 +15,7 @@ This is the pytorch implementation of STIDGCN. I hope these codes are helpful to
 We provide preprocessed datasets that you can access [here](#). If you need the original datasets, please refer to [STSGCN](https://github.com/Davidham3/STSGCN) (including PEMS03, PEMS04, PEMS07, and PEMS08) and [ESG](https://github.com/LiuZH-19/ESG) (including NYCBike and NYCTaxi).
 
 ## Train Commands
+```
 # PEMS08
 nohup python -u train.py --data PEMS08 > PEMS08.log 2>&1 &
 ```
