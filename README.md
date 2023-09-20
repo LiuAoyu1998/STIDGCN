@@ -22,11 +22,12 @@ nohup python -u train.py --data bike_drop > bike_drop.log &
 ```
 
 ## Results
-<center>
+<p align="center">
 <img src="figs/result1.png" width="80%">
-</center>
-<center>
+</p>
+<p align="center">
 <img src="figs/result2.png" width="100%">
-</center>
+</p>
+
 ## Acknowledgments
 Our model is built based on model of [Graph WaveNet](https://github.com/nnzhan/Graph-WaveNet) and [SCINet](https://github.com/cure-lab/SCINet).
