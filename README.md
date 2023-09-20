@@ -2,6 +2,8 @@
 
 This is the pytorch implementation of STIDGCN. I hope these codes are helpful to you, 🌟!
 
+<img src="logs/model.pdf" width="75%">
+
 ## Requirements
 - python
 - numpy
