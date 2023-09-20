@@ -1,6 +1,6 @@
 # STIDGCN
 This is the pytorch implementation of STIDGCN. I hope these codes are helpful to you!
-<img src="figs/model.png" width="80%">
+<img src="figs/model.png" width="75%">
 
 ## Requirements
 The code is built based on Python 3.9.12, PyTorch 1.11.0, and NumPy 1.21.2.
