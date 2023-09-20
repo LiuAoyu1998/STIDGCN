@@ -23,7 +23,7 @@ nohup python -u train.py --data bike_drop > bike_drop.log &
 
 ## Results
 <p align="center">
-<img src="figs/result1.png" width="90%">
+<img src="figs/result1.png" width="100%">
 </p>
 <p align="center">
 <img src="figs/result2.png" width="100%">
