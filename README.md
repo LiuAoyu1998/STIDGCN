@@ -2,7 +2,7 @@
 
 This is the pytorch implementation of STIDGCN. I hope these codes are helpful to you, 🌟!
 
-<img src="figs/model.pdf" width="75%">
+<img src="figs/model.png" width="75%">
 
 ## Requirements
 - python
