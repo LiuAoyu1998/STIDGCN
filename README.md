@@ -1,8 +1,8 @@
 # STIDGCN
 This is the pytorch implementation of STIDGCN. I hope these codes are helpful to you!
-<center>
+<div style="text-align:center;">
 <img src="figs/model.png" width="75%">
-</center>
+</div>
 
 ## Requirements
 The code is built based on Python 3.9.12, PyTorch 1.11.0, and NumPy 1.21.2.
