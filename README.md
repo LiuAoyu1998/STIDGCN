@@ -12,19 +12,9 @@ This is the pytorch implementation of STIDGCN. I hope these codes are helpful to
 - argparse
 
 ## Datasets
-Download the datasets(PEMS03, PEMS04, PEMS07, PEMS08) from here, [STSGCN](https://github.com/Davidham3/STSGCN). The data is processed in the same as STSGCN.
+We provide preprocessed datasets that you can access [here](#). If you need the original datasets, please refer to [STSGCN](https://github.com/Davidham3/STSGCN) (including PEMS03, PEMS04, PEMS07, and PEMS08) and [ESG](https://github.com/LiuZH-19/ESG) (including NYCBike and NYCTaxi).
 
 ## Train Commands
-```
-# PEMS03
-nohup python -u train.py --data PEMS03 > PEMS03.log 2>&1 &
-
-# PEMS04
-nohup python -u train.py --data PEMS04 > PEMS04.log 2>&1 &
-
-# PEMS07
-nohup python -u train.py --data PEMS07 > PEMS07.log 2>&1 &
-
 # PEMS08
 nohup python -u train.py --data PEMS08 > PEMS08.log 2>&1 &
 ```
