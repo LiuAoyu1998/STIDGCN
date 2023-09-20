@@ -1,6 +1,8 @@
 # STIDGCN
 This is the pytorch implementation of STIDGCN. I hope these codes are helpful to you!
+<center>
 <img src="figs/model.png" width="75%">
+</center>
 
 ## Requirements
 The code is built based on Python 3.9.12, PyTorch 1.11.0, and NumPy 1.21.2.
@@ -20,8 +22,11 @@ nohup python -u train.py --data bike_drop > bike_drop.log &
 ```
 
 ## Results
-<img src="figs/result1.png" width="100%">
+<center>
+<img src="figs/result1.png" width="80%">
+</center>
+<center>
 <img src="figs/result2.png" width="100%">
-
+</center>
 ## Acknowledgments
 Our model is built based on model of [Graph WaveNet](https://github.com/nnzhan/Graph-WaveNet) and [SCINet](https://github.com/cure-lab/SCINet).
