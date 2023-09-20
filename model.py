@@ -45,22 +45,6 @@ class TemporalEmbedding(nn.Module):
         return tem_emb
 
 
-# class Diffusion_GCN(nn.Module):
-#     def __init__(self, channels=128, dropout=0.1):
-#         super().__init__()
-#         self.conv = nn.Conv2d(channels, channels, (1, 1))
-#         self.dropout = nn.Dropout(dropout)
-
-#     def forward(self, x, adj):
-#         if adj.dim() == 3:
-#             x = torch.einsum("bcnt,bnm->bcmt", x, adj)
-#         elif adj.dim() == 2:
-#             x = torch.einsum("bcnt,nm->bcmt", x, adj)
-#         x = self.conv(x)
-#         output = self.dropout(x)
-#         return output
-
-
 class Diffusion_GCN(nn.Module):
     def __init__(self, channels=128, diffusion_step=1, dropout=0.1):
         super().__init__()
@@ -79,6 +63,7 @@ class Diffusion_GCN(nn.Module):
                 out.append(x)
         x = torch.cat(out, dim=1)
         x = self.conv(x)
+        x = x.flip(dims=[1])*torch.sigmoid(x)
         output = self.dropout(x)
         return output
 
