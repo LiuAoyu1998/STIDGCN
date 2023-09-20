@@ -20,8 +20,11 @@ We provide preprocessed datasets that you can access [here](https://drive.google
 
 ### PEMS08
 ```
-nohup python -u train.py --data PEMS08 > PEMS08.log 2>&1 &
+nohup python -u train.py --data PEMS08 > PEMS08.log &
 ```
-
+### NYCBike Drop-off
+```
+nohup python -u train.py --data bike_drop > bike_drop.log &
+```
 ## Acknowledgments
 Our model is built based on model of [Graph WaveNet](https://github.com/nnzhan/Graph-WaveNet) and [SCINet](https://github.com/cure-lab/SCINet).
