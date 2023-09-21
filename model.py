@@ -63,7 +63,6 @@ class Diffusion_GCN(nn.Module):
                 out.append(x)
         x = torch.cat(out, dim=1)
         x = self.conv(x)
-        x = x.flip(dims=[1])*torch.sigmoid(x)
         output = self.dropout(x)
         return output
 
