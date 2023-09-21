@@ -7,9 +7,8 @@ import pandas as pd
 import seaborn as sns
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--device", type=str, default="cuda:0", help="")
-parser.add_argument("--data", type=str, default="bike_pick", help="data path")
-parser.add_argument("--channels", type=int, default=128, help="number of nodes")
+parser.add_argument("--device", type=str, default="cuda:2", help="")
+parser.add_argument("--data", type=str, default="PEMS08", help="data path")
 parser.add_argument("--input_dim", type=int, default=3, help="number of input_dim")
 parser.add_argument("--batch_size", type=int, default=64, help="batch size")
 parser.add_argument("--learning_rate", type=float, default=0.001, help="learning rate")
@@ -20,17 +19,19 @@ parser.add_argument(
 parser.add_argument(
     "--checkpoint",
     type=str,
-    default="",
+    default="/home/lay/lay/work1/STIDGCN/logs/2023-08-16-21:28:19-PEMS08/best_model.pth",
     help="",
 )
 args = parser.parse_args()
 
 
 def main():
+
     if args.data == "PEMS08":
         args.data = "data//" + args.data
         num_nodes = 170
         granularity = 288
+        channels = 96
 
     elif args.data == "PEMS03":
         args.data = "data//" + args.data
@@ -38,41 +39,52 @@ def main():
         args.epochs = 300
         args.es_patience = 100
         granularity = 288
+        channels = 32
 
     elif args.data == "PEMS04":
         args.data = "data//" + args.data
         num_nodes = 307
         granularity = 288
+        channels = 64
+
 
     elif args.data == "PEMS07":
         args.data = "data//" + args.data
         num_nodes = 883
         granularity = 288
+        channels = 128
+
 
     elif args.data == "bike_drop":
         args.data = "data//" + args.data
         num_nodes = 250
         granularity = 48
+        channels = 32
+
 
     elif args.data == "bike_pick":
         args.data = "data//" + args.data
         num_nodes = 250
         granularity = 48
+        channels = 32
+
 
     elif args.data == "taxi_drop":
         args.data = "data//" + args.data
         num_nodes = 266
         granularity = 48
+        channels = 96
 
     elif args.data == "taxi_pick":
         args.data = "data//" + args.data
         num_nodes = 266
         granularity = 48
+        channels = 96
 
     device = torch.device(args.device)
 
     model = STIDGCN(
-        device, args.input_dim, num_nodes, args.channels, granularity, args.dropout
+        device, args.input_dim, num_nodes, channels, granularity, args.dropout
     )
     model.to(device)
     model.load_state_dict(torch.load(args.checkpoint))
