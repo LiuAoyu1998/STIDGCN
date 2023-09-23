@@ -1,7 +1,7 @@
 # STIDGCN
 This is the pytorch implementation of STIDGCN. I hope these codes are helpful to you!
 <p align="center">
-  <img src="figs/stidgcn.png" width="100%">
+  <img src="figs/model.png" width="100%">
 </p>
 
 ## Requirements
