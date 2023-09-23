@@ -132,8 +132,8 @@ def main():
     # yhat1 = yhat1.to("cpu")
     # print(realy.shape)
     # print(yhat1.shape)
-    # torch.save(realy,"stamt_04real.pt")
-    # torch.save(yhat1,"stamt_04pred.pt")
+    # torch.save(realy,"stidgcn_" + args.data + "_real.pt")
+    # torch.save(yhat1,"stidgcn_" + args.data + "_pred.pt")
 
 
 if __name__ == "__main__":
