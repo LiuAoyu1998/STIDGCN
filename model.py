@@ -34,17 +34,21 @@ class TemporalEmbedding(nn.Module):
 
     def forward(self, x):
         day_emb = x[..., 1]
-        time_day = self.time_day[(day_emb[:, -1, :] * self.time).type(torch.LongTensor)]
-        time_day = time_day.transpose(1, 2).unsqueeze(-1)
+        time_day = self.time_day[(day_emb[:, :, :] * self.time).type(torch.LongTensor)]
+        time_day = time_day.transpose(1, 2).contiguous()
 
         week_emb = x[..., 2]
-        time_week = self.time_week[(week_emb[:, -1, :]).type(torch.LongTensor)]
-        time_week = time_week.transpose(1, 2).unsqueeze(-1)
+        time_week = self.time_week[(week_emb[:, :, :]).type(torch.LongTensor)]
+        time_week = time_week.transpose(1, 2).contiguous()
 
         tem_emb = time_day + time_week
+
+        tem_emb = tem_emb.permute(0,3,1,2)
+
         return tem_emb
 
 
+    
 class Diffusion_GCN(nn.Module):
     def __init__(self, channels=128, diffusion_step=1, dropout=0.1):
         super().__init__()
@@ -56,46 +60,65 @@ class Diffusion_GCN(nn.Module):
         out = []
         for i in range(0, self.diffusion_step):
             if adj.dim() == 3:
-                x = torch.einsum("bcnt,bnm->bcmt", x, adj)
+                x = torch.einsum("bcnt,bnm->bcmt", x, adj).contiguous()
                 out.append(x)
             elif adj.dim() == 2:
-                x = torch.einsum("bcnt,nm->bcmt", x, adj)
+                x = torch.einsum("bcnt,nm->bcmt", x, adj).contiguous()
                 out.append(x)
         x = torch.cat(out, dim=1)
         x = self.conv(x)
         output = self.dropout(x)
         return output
 
-
+    
 class Graph_Generator(nn.Module):
-    def __init__(self, channels=128, diffusion_step=1, dropout=0.1):
+    def __init__(self, channels=128, num_nodes=170, diffusion_step=1, dropout=0.1):
         super().__init__()
-        self.gcn = Diffusion_GCN(channels, diffusion_step, dropout)
-        self.dropout = nn.Dropout(dropout)
-
-    def forward(self, x, adj):
-        x = self.gcn(x, adj)
-        x = self.dropout(x)
-        adj_dyn = torch.softmax(
+        self.memory = nn.Parameter(torch.randn(channels, num_nodes))
+        nn.init.xavier_uniform_(self.memory)
+        self.fc = nn.Linear(2,1)
+        
+    def forward(self, x):
+        adj_dyn_1 = torch.softmax(
             F.relu(
-                torch.einsum("bcn, bcm->bnm", x.sum(3), x.sum(3))
+                torch.einsum("bcnt, cm->bnm", x, self.memory).contiguous()
                 / math.sqrt(x.shape[1])
             ),
             -1,
         )
-        adj_dyn = adj_dyn + adj
-        return adj_dyn
+        adj_dyn_2 = torch.softmax(
+            F.relu(
+                torch.einsum("bcn, bcm->bnm", x.sum(-1), x.sum(-1)).contiguous()
+                / math.sqrt(x.shape[1])
+            ),
+            -1,
+        )
+        # adj_dyn = (adj_dyn_1 + adj_dyn_2 + adj)/2
+        adj_f = torch.cat([(adj_dyn_1).unsqueeze(-1)] + [(adj_dyn_2).unsqueeze(-1)], dim=-1)
+        adj_f = torch.softmax(self.fc(adj_f).squeeze(), -1)
+
+        topk_values, topk_indices = torch.topk(adj_f, k=int(adj_f.shape[1]*0.8), dim=-1)
+        mask = torch.zeros_like(adj_f)
+        mask.scatter_(-1, topk_indices, 1)
+        adj_f = adj_f * mask
+        
+        return adj_f
 
 
 class DGCN(nn.Module):
-    def __init__(self, channels=128, diffusion_step=1, dropout=0.1):
+    def __init__(self, channels=128, num_nodes=170, diffusion_step=1, dropout=0.1, emb=None):
         super().__init__()
-        self.generator = Graph_Generator(channels, diffusion_step, dropout)
+        self.conv = nn.Conv2d(channels,channels,(1,1))
+        self.generator = Graph_Generator(channels, num_nodes, diffusion_step, dropout)
         self.gcn = Diffusion_GCN(channels, diffusion_step, dropout)
+        self.emb = emb
 
-    def forward(self, x, adj):
-        adj_dyn = self.generator(x, adj)
-        x = self.gcn(x, adj_dyn) + x
+    def forward(self, x):
+        skip = x
+        x = self.conv(x)
+        adj_dyn = self.generator(x)
+        x = self.gcn(x, adj_dyn) 
+        x = x*self.emb + skip
         return x
 
 
@@ -121,7 +144,7 @@ class IDGCN(nn.Module):
         diffusion_step=1,
         splitting=True,
         num_nodes=170,
-        dropout=0.2,
+        dropout=0.2, emb = None
     ):
         super(IDGCN, self).__init__()
 
@@ -137,12 +160,6 @@ class IDGCN(nn.Module):
         Conv4 = []
         pad_l = 3
         pad_r = 3
-
-        apt_size = 10
-        nodevecs = torch.randn(num_nodes, apt_size), torch.randn(apt_size, num_nodes)
-        self.nodevec1, self.nodevec2 = [
-            nn.Parameter(n.to(device), requires_grad=True) for n in nodevecs
-        ]
 
         k1 = 5
         k2 = 3
@@ -184,7 +201,7 @@ class IDGCN(nn.Module):
         self.conv3 = nn.Sequential(*Conv3)
         self.conv4 = nn.Sequential(*Conv4)
 
-        self.dgcn = DGCN(channels, diffusion_step, dropout)
+        self.dgcn = DGCN(channels, num_nodes, diffusion_step, dropout, emb)
 
     def forward(self, x):
         if self.splitting:
@@ -192,24 +209,21 @@ class IDGCN(nn.Module):
         else:
             (x_even, x_odd) = x
 
-        adaptive_adj = torch.softmax(
-            F.relu(torch.mm(self.nodevec1, self.nodevec2)), dim=-1
-        )
-
+  
         x1 = self.conv1(x_even)
-        x1 = self.dgcn(x1, adaptive_adj)
+        x1 = self.dgcn(x1)
         d = x_odd.mul(torch.tanh(x1))
 
         x2 = self.conv2(x_odd)
-        x2 = self.dgcn(x2, adaptive_adj)
+        x2 = self.dgcn(x2)
         c = x_even.mul(torch.tanh(x2))
 
         x3 = self.conv3(c)
-        x3 = self.dgcn(x3, adaptive_adj)
+        x3 = self.dgcn(x3)
         x_odd_update = d + x3
 
         x4 = self.conv4(d)
-        x4 = self.dgcn(x4, adaptive_adj)
+        x4 = self.dgcn(x4)
         x_even_update = c + x4
 
         return (x_even_update, x_odd_update)
@@ -221,13 +235,17 @@ class IDGCN_Tree(nn.Module):
     ):
         super().__init__()
 
+        self.memory1 = nn.Parameter(torch.randn(channels, num_nodes, 6))
+        self.memory2 = nn.Parameter(torch.randn(channels, num_nodes, 3))
+        self.memory3 = nn.Parameter(torch.randn(channels, num_nodes, 3))
+
         self.IDGCN1 = IDGCN(
             device=device,
             splitting=True,
             channels=channels,
             diffusion_step=diffusion_step,
             num_nodes=num_nodes,
-            dropout=dropout,
+            dropout=dropout,emb=self.memory1
         )
         self.IDGCN2 = IDGCN(
             device=device,
@@ -235,7 +253,7 @@ class IDGCN_Tree(nn.Module):
             channels=channels,
             diffusion_step=diffusion_step,
             num_nodes=num_nodes,
-            dropout=dropout,
+            dropout=dropout,emb=self.memory2
         )
         self.IDGCN3 = IDGCN(
             device=device,
@@ -243,7 +261,7 @@ class IDGCN_Tree(nn.Module):
             channels=channels,
             diffusion_step=diffusion_step,
             num_nodes=num_nodes,
-            dropout=dropout,
+            dropout=dropout,emb=self.memory2
         )
 
     def concat(self, even, odd):
@@ -286,16 +304,16 @@ class STIDGCN(nn.Module):
 
         self.tree = IDGCN_Tree(
             device=device,
-            channels=channels,
+            channels=channels*2,
             diffusion_step=diffusion_step,
             num_nodes=self.num_nodes,
             dropout=dropout,
         )
 
-        self.glu = GLU(channels, dropout)
+        self.glu = GLU(channels*2, dropout)
 
         self.regression_layer = nn.Conv2d(
-            channels, self.output_len, kernel_size=(1, self.output_len)
+            channels*2, self.output_len, kernel_size=(1, self.output_len)
         )
 
     def param_num(self):
@@ -306,7 +324,7 @@ class STIDGCN(nn.Module):
         # Encoder
         # Data Embedding
         time_emb = self.Temb(input.permute(0, 3, 2, 1))
-        x = self.start_conv(x) + time_emb
+        x = torch.cat([self.start_conv(x)] + [time_emb], dim=1)
         # IDGCN_Tree
         x = self.tree(x)
         # Decoder
