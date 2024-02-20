@@ -1,7 +1,8 @@
 # STIDGCN
 This is the pytorch implementation of STIDGCN. I hope these codes are helpful to you!
 
-STIDGCN is accepted by TITS (IEEE Transactions on Intelligent Transportation Systems).
+[STIDGCN is accepted by TITS (IEEE Transactions on Intelligent Transportation Systems).]([https://drive.google.com/drive/folders/1-5hKD4hKd0eRdagm4MBW1g5kjH5qgmHR?usp=sharing](https://ieeexplore.ieee.org/document/10440184))
+
 <p align="center">
   <img src="figs/model.png" width="100%">
 </p>
