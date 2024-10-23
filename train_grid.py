@@ -7,7 +7,7 @@ import util
 import os
 from util import *
 import random
-from model_grid import STAT
+from model_grid import STIDGCN
 from ranger21 import Ranger
 
 parser = argparse.ArgumentParser()
@@ -49,7 +49,7 @@ def seed_it(seed):
 
 class trainer():
     def __init__(self, scaler, num_nodes, channels, dropout, lrate, wdecay, device, pre_adj,pre_adj_t):
-        self.model = STAT(device, num_nodes, channels,
+        self.model = STIDGCN(device, num_nodes, channels,
                              dropout, pre_adj=pre_adj)
         self.model.to(device)
         self.optimizer = Ranger(self.model.parameters(),
@@ -214,7 +214,7 @@ def main():
             if i < 100:
                 # It is not necessary to print the results of the test set when epoch is less than 100, because the model has not yet converged.
                 loss = mvalid_loss
-                torch.save(engine.model.state_dict(),
+                torch.save(engine.model.STIDGCNe_dict(),
                            path+"best_model.pth")
                 bestid = i
                 epochs_since_best_mae = 0
@@ -253,7 +253,7 @@ def main():
                 if np.mean(amae) < test_log:
                     test_log = np.mean(amae)
                     loss = mvalid_loss
-                    torch.save(engine.model.state_dict(),
+                    torch.save(engine.model.STIDGCNe_dict(),
                                path+"best_model.pth")
                     epochs_since_best_mae = 0
                     print("Test low! Updating! Test Loss:",
@@ -286,7 +286,7 @@ def main():
     print("The valid loss of the best model",
           str(round(his_loss[bestid-1], 4)))
 
-    engine.model.load_state_dict(torch.load(path+"best_model.pth"))
+    engine.model.load_STIDGCNe_dict(torch.load(path+"best_model.pth"))
     outputs = []
     realy = torch.Tensor(dataloader['y_test']).to(device)
     realy = realy.transpose(1, 3) # torch.Size([64, 1, 75, 1])
