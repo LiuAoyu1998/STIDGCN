@@ -262,7 +262,7 @@ class IDGCN_Tree(nn.Module):
         return output
 
 
-class STAT(nn.Module):
+class STIDGCN(nn.Module):
     def __init__(self, device, num_nodes, channels, dropout=0.1, pre_adj=None):
         super().__init__()
 
