@@ -17,11 +17,15 @@ We provide preprocessed datasets that you can access [here](https://drive.google
 It's easy to run! Here are some examples, and you can customize the model settings in train.py.
 ### PEMS08
 ```
-nohup python -u train.py --data PEMS08 > PEMS08.log &
+nohup python -u train.py --data PEMS08 --batch_size 64 > PEMS08.log &
 ```
 ### NYCBike Drop-off
 ```
-nohup python -u train.py --data bike_drop > bike_drop.log &
+nohup python -u train.py --data bike_drop --batch_size 16 > bike_drop.log &
+```
+### TDrive Infolw
+```
+nohup python -u train_grid.py --data TDrive_i --batch_size 16 > TDrive_i.log &
 ```
 
 ## Results
