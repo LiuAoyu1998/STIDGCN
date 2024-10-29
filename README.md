@@ -23,7 +23,7 @@ nohup python -u train.py --data PEMS08 --batch_size 64 > PEMS08.log &
 ```
 nohup python -u train.py --data bike_drop --batch_size 16 > bike_drop.log &
 ```
-### TDrive Infolw
+### TDrive Inflow
 ```
 nohup python -u train_grid.py --data TDrive_i --batch_size 16 > TDrive_i.log &
 ```
