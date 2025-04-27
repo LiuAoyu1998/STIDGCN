@@ -115,7 +115,7 @@ def main():
         args.data = "data//" + args.data
         num_nodes = 170
         granularity = 288
-        channels = 96
+        channels = 48
 
     elif args.data == "PEMS03":
         args.data = "data//" + args.data
@@ -129,7 +129,7 @@ def main():
         args.data = "data//" + args.data
         num_nodes = 307
         granularity = 288
-        channels = 64
+        channels = 48
 
 
     elif args.data == "PEMS07":
